@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CategoryCard } from "@/components/CategoryCard";
 import { SearchBar } from "@/components/SearchBar";
 import { SortProducts } from "@/components/SortProducts";
+import { MobileCategorySelect } from "@/components/MobileCategorySelect";
 import { LinkButton } from "@/components/ui/Button";
 import { getCategories, getCategoryBySlug, getProducts } from "@/lib/woocommerce";
 import { cn } from "@/lib/utils";
@@ -56,7 +57,8 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
         <aside className="space-y-4">
           <div className="rounded border border-line bg-white p-4">
             <h2 className="font-semibold">Categories</h2>
-            <div className="mt-4 grid gap-1">
+            <MobileCategorySelect categories={categories} activeCategorySlug={searchParams.category} />
+            <div className="mt-4 hidden lg:grid gap-1">
               <Link
                 href="/shop"
                 className={cn(
