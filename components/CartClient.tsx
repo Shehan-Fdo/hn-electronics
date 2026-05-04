@@ -33,6 +33,10 @@ export function CartClient() {
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
 
   function orderViaWhatsApp() {
+    if (!whatsappNumber) {
+      alert("WhatsApp ordering is not available right now. Please contact us directly.");
+      return;
+    }
     const message = encodeURIComponent(buildWhatsAppMessage(items, subtotal));
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank", "noopener,noreferrer");
   }
@@ -99,7 +103,11 @@ export function CartClient() {
                     <button
                       className="grid h-10 w-10 shrink-0 place-items-center"
                       aria-label={`Decrease quantity for ${item.product.name}`}
-                      onClick={() => updateQty(item.product.id, item.quantity - 1)}
+                      onClick={() =>
+                        item.quantity === 1
+                          ? removeItem(item.product.id)
+                          : updateQty(item.product.id, item.quantity - 1)
+                      }
                     >
                       <Minus className="h-4 w-4" aria-hidden="true" />
                     </button>

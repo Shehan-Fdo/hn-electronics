@@ -81,7 +81,6 @@ export function Navbar() {
         >
           <motion.div
             className="ml-auto flex h-full w-[86%] max-w-sm flex-col gap-6 border-l border-line bg-white p-5"
-            style={{ backgroundColor: "#FFFFFF" }}
             variants={drawerPanel}
           >
             <div className="flex items-center justify-between">

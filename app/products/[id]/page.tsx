@@ -5,7 +5,7 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { ProductGallery } from "@/components/ProductGallery";
 import { AddToCartPanel } from "@/components/AddToCartPanel";
 import { ProductGrid } from "@/components/ProductGrid";
-import { formatPrice, stripHtml } from "@/lib/utils";
+import { formatPrice, sanitizeHtml, stripHtml } from "@/lib/utils";
 import { getProduct, getProducts } from "@/lib/woocommerce";
 
 type ProductPageProps = {
@@ -40,7 +40,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   try {
     product = await getProduct(params.id);
   } catch {
-    notFound();
+    return notFound();
   }
 
   const category = product.categories?.[0];
@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {product.short_description && (
             <div
               className="prose-store mt-6 text-muted break-words"
-              dangerouslySetInnerHTML={{ __html: product.short_description }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.short_description) }}
             />
           )}
           <div className="mt-8">
@@ -107,7 +107,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {product.description && (
         <section className="mt-16 border-t border-line pt-10">
           <h2 className="text-2xl font-bold">Description</h2>
-          <div className="prose-store mt-6 max-w-4xl" dangerouslySetInnerHTML={{ __html: product.description }} />
+          <div className="prose-store mt-6 max-w-4xl" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
         </section>
       )}
 

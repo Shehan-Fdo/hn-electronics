@@ -32,6 +32,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const saved = window.localStorage.getItem(storageKey);
       if (saved) setItems(JSON.parse(saved) as CartItem[]);
+    } catch {
+      // Corrupt or unreadable cart data — nuke it and start fresh
+      window.localStorage.removeItem(storageKey);
     } finally {
       setLoaded(true);
     }

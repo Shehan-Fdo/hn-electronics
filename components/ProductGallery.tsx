@@ -54,7 +54,7 @@ export function ProductGallery({ images, name }: { images: WCImage[]; name: stri
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.12, ease: smoothEase }}
             >
-              <Image src={image.src} alt={productImageAlt(name, image.alt)} fill sizes="80px" className="object-contain p-2" priority />
+              <Image src={image.src} alt={productImageAlt(name, image.alt)} fill sizes="80px" className="object-contain p-2" />
             </motion.button>
           ))}
         </div>

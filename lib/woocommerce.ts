@@ -1,6 +1,7 @@
 import { ProductQuery, WCCategory, WCProduct } from "@/types/woocommerce";
 
-const baseUrl = process.env.NEXT_PUBLIC_WC_BASE_URL;
+// Server-only env vars — NOT prefixed with NEXT_PUBLIC_
+const baseUrl = process.env.WC_BASE_URL ?? process.env.NEXT_PUBLIC_WC_BASE_URL;
 const consumerKey = process.env.WC_CONSUMER_KEY;
 const consumerSecret = process.env.WC_CONSUMER_SECRET;
 
@@ -10,8 +11,6 @@ function buildUrl(path: string, params: Record<string, string | number | undefin
   }
 
   const url = new URL(`${baseUrl}${path}`);
-  url.searchParams.set("consumer_key", consumerKey);
-  url.searchParams.set("consumer_secret", consumerSecret);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") {
@@ -22,15 +21,18 @@ function buildUrl(path: string, params: Record<string, string | number | undefin
   return url.toString();
 }
 
+function buildAuthHeader(): string {
+  // Basic auth keeps credentials out of URL query params (and therefore out of server logs)
+  const encoded = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+  return `Basic ${encoded}`;
+}
+
 async function wcFetch<T>(path: string, params?: Record<string, string | number | undefined>) {
   const isProduction = process.env.NODE_ENV === "production";
-  const response = await fetch(buildUrl(path, params), isProduction
-    ? {
-        next: { revalidate: 1800 }
-      }
-    : {
-        cache: "no-store"
-      });
+  const response = await fetch(buildUrl(path, params), {
+    headers: { Authorization: buildAuthHeader() },
+    ...(isProduction ? { next: { revalidate: 1800 } } : { cache: "no-store" })
+  });
 
   if (!response.ok) {
     throw new Error(`WooCommerce request failed: ${response.status}`);
@@ -52,15 +54,29 @@ export function getProduct(id: number | string) {
   return wcFetch<WCProduct>(`/products/${id}`);
 }
 
-export function getCategories() {
-  return wcFetch<WCCategory[]>("/products/categories", {
-    per_page: 100,
-    hide_empty: "true"
-  });
+export async function getCategories(): Promise<WCCategory[]> {
+  const perPage = 100; // WC REST API max per page
+  const results: WCCategory[] = [];
+  let page = 1;
+
+  while (true) {
+    const batch = await wcFetch<WCCategory[]>("/products/categories", {
+      per_page: perPage,
+      page,
+      hide_empty: "true"
+    });
+    results.push(...batch);
+    // If we got fewer items than requested, we've reached the last page
+    if (batch.length < perPage) break;
+    page++;
+  }
+
+  return results;
 }
 
-export async function getCategoryBySlug(slug?: string) {
+export async function getCategoryBySlug(slug?: string, categories?: WCCategory[]) {
   if (!slug) return undefined;
-  const categories = await getCategories();
-  return categories.find((category) => category.slug === slug);
+  // Reuse pre-fetched list when available to avoid a redundant API call
+  const list = categories ?? (await getCategories());
+  return list.find((category) => category.slug === slug);
 }

@@ -6,8 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { formatPrice } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { formatPrice, cn } from "@/lib/utils";
 
 type Suggestion = {
   id: number;
@@ -31,6 +30,7 @@ export function SearchBar({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,21 +47,31 @@ export function SearchBar({
     const trimmedQuery = query.trim();
     if (!trimmedQuery || trimmedQuery.length < 2) {
       setSuggestions([]);
+      setSearchError(false);
       setIsOpen(false);
       return;
     }
 
     const timer = setTimeout(async () => {
       setIsLoading(true);
+      setSearchError(false);
       try {
         const response = await fetch(`/api/search?q=${encodeURIComponent(trimmedQuery)}`);
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data);
           setIsOpen(true);
+        } else {
+          // Non-ok response (4xx/5xx) — clear stale results and show error
+          setSuggestions([]);
+          setSearchError(true);
+          setIsOpen(true);
         }
-      } catch (e) {
-        console.error("Failed to fetch suggestions");
+      } catch {
+        // Network failure — clear stale results and show error
+        setSuggestions([]);
+        setSearchError(true);
+        setIsOpen(true);
       } finally {
         setIsLoading(false);
       }
@@ -95,7 +105,7 @@ export function SearchBar({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => {
-            if (suggestions.length > 0) setIsOpen(true);
+            if (suggestions.length > 0 || searchError) setIsOpen(true);
           }}
         />
         {isLoading ? (
@@ -107,37 +117,41 @@ export function SearchBar({
         )}
       </form>
 
-      {isOpen && suggestions.length > 0 && (
+      {isOpen && (suggestions.length > 0 || searchError) && (
         <div className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded border border-line bg-white shadow-lg">
-          <ul className="max-h-96 overflow-y-auto py-2">
-            {suggestions.map((suggestion) => (
-              <li key={suggestion.id}>
-                <Link
-                  href={`/products/${suggestion.id}`}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-line bg-neutral-50">
-                    {suggestion.image ? (
-                      <Image
-                        src={suggestion.image}
-                        alt={suggestion.alt}
-                        fill
-                        sizes="40px"
-                        className="object-contain p-1"
-                      />
-                    ) : (
-                      <div className="grid h-full place-items-center text-[10px] text-muted">No img</div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink">{suggestion.name}</p>
-                    <p className="text-xs text-muted">{formatPrice(suggestion.price)}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {searchError ? (
+            <p className="px-4 py-3 text-sm text-muted">Search unavailable. Try again.</p>
+          ) : (
+            <ul className="max-h-96 overflow-y-auto py-2">
+              {suggestions.map((suggestion) => (
+                <li key={suggestion.id}>
+                  <Link
+                    href={`/products/${suggestion.id}`}
+                    className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-line bg-neutral-50">
+                      {suggestion.image ? (
+                        <Image
+                          src={suggestion.image}
+                          alt={suggestion.alt}
+                          fill
+                          sizes="40px"
+                          className="object-contain p-1"
+                        />
+                      ) : (
+                        <div className="grid h-full place-items-center text-[10px] text-muted">No img</div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-ink">{suggestion.name}</p>
+                      <p className="text-xs text-muted">{formatPrice(suggestion.price)}</p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>

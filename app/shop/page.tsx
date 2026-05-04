@@ -29,10 +29,8 @@ function pageHref(params: ShopParams, page: number) {
 
 export default async function ShopPage({ searchParams }: { searchParams: ShopParams }) {
   const page = Math.max(1, Number(searchParams.page || 1));
-  const [categories, activeCategory] = await Promise.all([
-    getCategories(),
-    getCategoryBySlug(searchParams.category)
-  ]);
+  const categories = await getCategories();
+  const activeCategory = await getCategoryBySlug(searchParams.category, categories);
   const products = await getProducts({
     per_page: 20,
     page,
@@ -85,7 +83,7 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
           </div>
         </aside>
 
-      <section>
+        <section>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-muted">
               Showing {products.length} product{products.length === 1 ? "" : "s"}
@@ -94,13 +92,21 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
           </div>
           <SortProducts products={products} />
           <div className="mt-10 flex items-center justify-between border-t border-line pt-6">
-            <LinkButton href={pageHref(searchParams, Math.max(1, page - 1))} variant="secondary">
-              Previous
-            </LinkButton>
+            {page > 1 ? (
+              <LinkButton href={pageHref(searchParams, page - 1)} variant="secondary">
+                Previous
+              </LinkButton>
+            ) : (
+              <span />
+            )}
             <span className="text-sm text-muted">Page {page}</span>
-            <LinkButton href={pageHref(searchParams, page + 1)} variant="secondary">
-              Next
-            </LinkButton>
+            {products.length === 20 ? (
+              <LinkButton href={pageHref(searchParams, page + 1)} variant="secondary">
+                Next
+              </LinkButton>
+            ) : (
+              <span />
+            )}
           </div>
         </section>
       </div>
