@@ -75,16 +75,16 @@ export default async function HomePage() {
       </section>
 
       <section className="border-y border-line">
-        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-8 sm:px-6 md:grid-cols-4 lg:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-8 sm:px-6 md:grid-cols-4 lg:px-8">
           {[
             { icon: Truck, label: "Islandwide Delivery" },
             { icon: ShieldCheck, label: "Genuine Products" },
             { icon: RotateCcw, label: "Easy Returns" },
             { icon: Zap, label: "Sri Lanka's Trusted Store" }
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3">
+            <div key={item.label} className="flex flex-col items-center gap-3 rounded border border-line p-4 text-center md:flex-row md:border-0 md:p-0 md:text-left md:rounded-none">
               <item.icon className="h-5 w-5 text-accent" aria-hidden="true" />
-              <span className="font-medium">{item.label}</span>
+              <span className="font-medium text-sm md:text-base">{item.label}</span>
             </div>
           ))}
         </div>
