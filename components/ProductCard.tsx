@@ -16,13 +16,13 @@ export function ProductCard({ product }: { product: WCProduct }) {
   const { addItem } = useCart();
   const image = product.images?.[0];
   const onSale = Boolean(product.sale_price && product.sale_price !== product.regular_price);
-  const outOfStock = product.stock_status === "outofstock";
+
   const [added, setAdded] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (outOfStock) return;
+
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -48,7 +48,7 @@ export function ProductCard({ product }: { product: WCProduct }) {
           )}
           <div className="absolute left-3 top-3 flex gap-2">
             {onSale && <Badge>Sale</Badge>}
-            {outOfStock && <Badge>Out</Badge>}
+
           </div>
         </div>
       </Link>
@@ -69,8 +69,7 @@ export function ProductCard({ product }: { product: WCProduct }) {
         <Button
           className="mt-auto relative overflow-hidden"
           fullWidth
-          variant={outOfStock ? "secondary" : "primary"}
-          disabled={outOfStock}
+          variant="primary"
           onClick={handleAdd}
           aria-label={`Add ${product.name} to cart`}
         >
@@ -97,7 +96,7 @@ export function ProductCard({ product }: { product: WCProduct }) {
                 className="flex items-center gap-2"
               >
                 <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                <span>{outOfStock ? "Out of Stock" : "Add to Cart"}</span>
+                <span>Add to Cart</span>
               </motion.div>
             )}
           </AnimatePresence>

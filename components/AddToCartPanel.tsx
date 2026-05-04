@@ -9,11 +9,11 @@ import { WCProduct } from "@/types/woocommerce";
 
 export function AddToCartPanel({ product }: { product: WCProduct }) {
   const { addItem } = useCart();
-  const outOfStock = product.stock_status === "outofstock";
+
   const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
-    if (outOfStock) return;
+
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -23,8 +23,7 @@ export function AddToCartPanel({ product }: { product: WCProduct }) {
     <Button
       size="lg"
       fullWidth
-      disabled={outOfStock}
-      variant={outOfStock ? "secondary" : "primary"}
+      variant="primary"
       onClick={handleAdd}
       aria-label={`Add ${product.name} to cart`}
       className="relative overflow-hidden"
@@ -52,7 +51,7 @@ export function AddToCartPanel({ product }: { product: WCProduct }) {
             className="flex items-center gap-2"
           >
             <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-            <span>{outOfStock ? "Out of Stock" : "Add to Cart"}</span>
+            <span>Add to Cart</span>
           </motion.div>
         )}
       </AnimatePresence>

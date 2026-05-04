@@ -64,9 +64,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="min-w-0">
           <div className="mb-4 flex flex-wrap gap-2">
             {onSale && <Badge>Sale</Badge>}
-            <Badge className={product.stock_status === "instock" ? "border-green-200 text-green-700" : "border-red-200 text-red-700"}>
-              {product.stock_status === "instock" ? "In Stock" : "Out of Stock"}
-            </Badge>
+
           </div>
           <h1 className="text-4xl font-bold leading-tight lg:text-5xl">{product.name}</h1>
           <div className="mt-5 text-xl">
