@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowRight, RotateCcw, ShieldCheck, Truck, Zap } from "lucide-react";
+import { ArrowRight, Tag, ShieldCheck, Truck, Zap } from "lucide-react";
 import { CategoryCard } from "@/components/CategoryCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { LinkButton } from "@/components/ui/Button";
@@ -79,7 +79,7 @@ export default async function HomePage() {
           {[
             { icon: Truck, label: "Islandwide Delivery" },
             { icon: ShieldCheck, label: "Genuine Products" },
-            { icon: RotateCcw, label: "Easy Returns" },
+            { icon: Tag, label: "Affordable products" },
             { icon: Zap, label: "Sri Lanka's Trusted Store" }
           ].map((item) => (
             <div key={item.label} className="flex flex-col items-center gap-3 rounded border border-line p-4 text-center md:flex-row md:border-0 md:p-0 md:text-left md:rounded-none">
