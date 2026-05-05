@@ -27,6 +27,15 @@ function buildAuthHeader(): string {
   return `Basic ${encoded}`;
 }
 
+function getWcOrigin() {
+  if (!baseUrl) return "";
+  try {
+    return new URL(baseUrl).origin;
+  } catch {
+    return "";
+  }
+}
+
 async function wcFetch<T>(path: string, params?: Record<string, string | number | undefined>) {
   const isProduction = process.env.NODE_ENV === "production";
   const response = await fetch(buildUrl(path, params), {
@@ -38,7 +47,18 @@ async function wcFetch<T>(path: string, params?: Record<string, string | number 
     throw new Error(`WooCommerce request failed: ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  const origin = getWcOrigin();
+  
+  if (origin) {
+    const escapedOrigin = origin.replace(/\//g, "\\/");
+    const replaced = text
+      .split(origin + "/wp-content/").join("/wp-content/")
+      .split(escapedOrigin + "\\/wp-content\\/").join("\\/wp-content\\/");
+    return JSON.parse(replaced) as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 export function getProducts(params: ProductQuery = {}) {
