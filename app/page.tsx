@@ -57,7 +57,7 @@ export default async function HomePage() {
             <p className="text-sm uppercase tracking-normal text-muted">Categories</p>
             <h2 className="mt-2 text-3xl font-bold">Shop by category</h2>
           </div>
-          <LinkButton href="/shop" variant="ghost">View all</LinkButton>
+          <LinkButton href="/shop" variant="ghost" className="shrink-0 whitespace-nowrap">View all</LinkButton>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {visibleCategories.map((category) => (

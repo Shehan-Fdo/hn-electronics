@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -28,9 +29,31 @@ function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
   ].join("\n");
 }
 
+function buildCopyMessage(items: CartItem[], subtotal: number) {
+  const lines = items.map((item, index) => {
+    const lineTotal = Number(item.product.price || 0) * item.quantity;
+    return `${index + 1}. ${item.product.name} × ${item.quantity} — ${formatPrice(lineTotal)}`;
+  });
+
+  return [
+    ...lines,
+    "",
+    `Subtotal: ${formatPrice(subtotal)}`,
+    `Total: ${formatPrice(subtotal)}`
+  ].join("\n");
+}
+
 export function CartClient() {
   const { items, subtotal, removeItem, updateQty, clearCart } = useCart();
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    const text = buildCopyMessage(items, subtotal);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   function orderViaWhatsApp() {
     if (!whatsappNumber) {
@@ -145,7 +168,39 @@ export function CartClient() {
         </motion.section>
 
         <motion.aside className="h-fit rounded border border-line p-6" variants={fadeUp}>
-          <h2 className="text-2xl font-bold">Order Summary</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Order Summary</h2>
+            <button
+              onClick={handleCopy}
+              className="flex items-center justify-center text-muted transition-colors hover:text-ink"
+              aria-label="Copy order summary"
+              title="Copy order summary"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {copied ? (
+                  <motion.div
+                    key="check"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Check className="h-5 w-5 text-ink" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="copy"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Copy className="h-5 w-5" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          </div>
           <div className="mt-6 space-y-3">
             {items.map((item) => (
               <div key={item.product.id} className="flex justify-between gap-4 text-sm">
