@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 import { LinkButton } from "@/components/ui/Button";
 import { MotionSection, MotionStaggerDiv, MotionArticle } from "@/components/Motion";
 
@@ -38,7 +44,7 @@ export default function AboutPage() {
       <MotionSection id="contact" className="mt-20 border-t border-line pt-12">
         <p className="text-sm uppercase tracking-normal text-muted">Contact</p>
         <h2 className="mt-2 text-3xl font-bold">Talk to HN Electronics</h2>
-        <MotionStaggerDiv className="mt-8 grid gap-4 md:grid-cols-2">
+        <MotionStaggerDiv className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <MotionArticle className="rounded border border-line p-5">
             <Phone className="h-5 w-5 text-accent" aria-hidden="true" />
             <h3 className="mt-4 font-semibold">Phone</h3>
@@ -59,6 +65,13 @@ export default function AboutPage() {
             <h3 className="mt-4 font-semibold">WhatsApp</h3>
             <LinkButton className="mt-4" href={`https://wa.me/${number}`} variant="secondary">
               Message on WhatsApp
+            </LinkButton>
+          </MotionArticle>
+          <MotionArticle className="rounded border border-line p-5">
+            <FacebookIcon className="h-5 w-5 text-accent" aria-hidden="true" />
+            <h3 className="mt-4 font-semibold">Facebook</h3>
+            <LinkButton className="mt-4" href="https://web.facebook.com/profile.php?id=100092009020397" variant="secondary" target="_blank" rel="noopener noreferrer">
+              Visit Facebook
             </LinkButton>
           </MotionArticle>
         </MotionStaggerDiv>

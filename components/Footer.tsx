@@ -24,6 +24,7 @@ export function Footer() {
           <div className="mt-4 grid gap-3 text-sm text-white/80">
             <p>WhatsApp: +94 78 663 7512</p>
             <p>Email: hello@hnelectronics.lk</p>
+            <p><a href="https://facebook.com/hnelectronics" target="_blank" rel="noopener noreferrer" className="hover:text-white">Facebook</a></p>
             <p>Sri Lanka</p>
           </div>
         </div>
