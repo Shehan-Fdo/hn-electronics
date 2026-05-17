@@ -4,18 +4,14 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "hnelectronics-127f13b.ingress-earth.ewp.live"
+        hostname: "images.unsplash.com"
+      },
+      {
+        protocol: "https",
+        hostname: "pub-1bf4c41a11914900a0a34a31e2b4cb59.r2.dev"
       }
     ]
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/wp-content/:path*',
-        destination: 'https://hnelectronics-127f13b.ingress-earth.ewp.live/wp-content/:path*',
-      },
-    ];
-  },
+  }
 };
 
 module.exports = nextConfig;
