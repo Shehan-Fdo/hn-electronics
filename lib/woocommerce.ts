@@ -10,7 +10,10 @@ function buildUrl(path: string, params: Record<string, string | number | undefin
     throw new Error("WooCommerce environment variables are not configured.");
   }
 
-  const url = new URL(`${baseUrl}${path}`);
+  // Normalize slashes: remove trailing from base, ensure leading on path
+  const cleanBase = baseUrl.replace(/\/+$/, "");
+  const cleanPath = "/" + path.replace(/^\/+/, "");
+  const url = new URL(`${cleanBase}${cleanPath}`);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") {
@@ -37,14 +40,16 @@ function getWcOrigin() {
 }
 
 async function wcFetch<T>(path: string, params?: Record<string, string | number | undefined>) {
+  const url = buildUrl(path, params);
   const isProduction = process.env.NODE_ENV === "production";
-  const response = await fetch(buildUrl(path, params), {
+  
+  const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader() },
     ...(isProduction ? { next: { revalidate: 1800 } } : { cache: "no-store" })
   });
 
   if (!response.ok) {
-    throw new Error(`WooCommerce request failed: ${response.status}`);
+    throw new Error(`WooCommerce request failed: ${response.status} at ${url}`);
   }
 
   const text = await response.text();
