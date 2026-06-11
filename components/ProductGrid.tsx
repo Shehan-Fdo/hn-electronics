@@ -1,11 +1,11 @@
 "use client";
 
-import { WCProduct } from "@/types/woocommerce";
+import { Product } from "@/types/api";
 import { ProductCard } from "@/components/ProductCard";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer } from "@/components/Motion";
 
-export function ProductGrid({ products }: { products: WCProduct[] }) {
+export function ProductGrid({ products }: { products: Product[] }) {
   if (!products.length) {
     return (
       <motion.div
@@ -28,7 +28,7 @@ export function ProductGrid({ products }: { products: WCProduct[] }) {
       animate="show"
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product._id} product={product} />
       ))}
     </motion.div>
   );

@@ -12,7 +12,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "hn-backend.shehan-dev.workers.dev"
+        hostname: "cdn.hnelectronics.lk"
       }
     ]
   }

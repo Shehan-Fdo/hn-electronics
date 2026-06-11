@@ -5,9 +5,9 @@ import { Check, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
-import { WCProduct } from "@/types/woocommerce";
+import { Product } from "@/types/api";
 
-export function AddToCartPanel({ product }: { product: WCProduct }) {
+export function AddToCartPanel({ product }: { product: Product }) {
   const { addItem } = useCart();
 
   const [added, setAdded] = useState(false);

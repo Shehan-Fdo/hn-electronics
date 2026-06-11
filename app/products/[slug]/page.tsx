@@ -6,17 +6,17 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { AddToCartPanel } from "@/components/AddToCartPanel";
 import { ProductGrid } from "@/components/ProductGrid";
 import { formatPrice, sanitizeHtml, stripHtml } from "@/lib/utils";
-import { getProduct, getProducts } from "@/lib/woocommerce";
+import { getProduct, getProducts } from "@/lib/api";
 
 type ProductPageProps = {
-  params: { id: string };
+  params: { slug: string };
 };
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   try {
-    const product = await getProduct(params.id);
-    const description = stripHtml(product.short_description || product.description).slice(0, 160);
-    const images = product.images?.[0] ? [{ url: product.images[0].src, alt: product.name }] : [];
+    const product = await getProduct(params.slug);
+    const description = stripHtml(product.shortDescription || product.description).slice(0, 160);
+    const images = product.images?.[0] ? [{ url: product.images[0], alt: product.name }] : [];
 
     return {
       title: product.name,
@@ -38,24 +38,43 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params }: ProductPageProps) {
   let product;
   try {
-    product = await getProduct(params.id);
+    product = await getProduct(params.slug);
   } catch {
     return notFound();
   }
 
-  const category = product.categories?.[0];
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images || [],
+    description: stripHtml(product.shortDescription || product.description),
+    sku: (product as any).sku || product._id,
+    offers: {
+      "@type": "Offer",
+      url: `https://www.hnelectronics.lk/products/${product.slug}`,
+      priceCurrency: "LKR",
+      price: product.price,
+      availability: "https://schema.org/InStock",
+    },
+  };
+
+  const category = product.categoryIds?.[0]; // just strings for now, or populate them in API if needed
   const related = category
-    ? (await getProducts({ category: category.id, per_page: 5 })).filter((item) => item.id !== product.id).slice(0, 4)
+    ? (await getProducts({ category: category, limit: 5 })).data.filter((item) => item._id !== product._id).slice(0, 4)
     : [];
-  const onSale = Boolean(product.sale_price && product.sale_price !== product.regular_price);
+  const onSale = Boolean(product.price && product.price !== product.price);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumb
         items={[
           { href: "/", label: "Home" },
           { href: "/shop", label: "Shop" },
-          ...(category ? [{ href: `/shop?category=${category.slug}`, label: category.name }] : []),
           { label: product.name }
         ]}
       />
@@ -70,37 +89,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="mt-5 text-xl">
             {onSale ? (
               <div className="flex flex-wrap items-center gap-3">
-                <span>{formatPrice(product.sale_price)}</span>
-                <span className="text-base text-muted line-through">{formatPrice(product.regular_price)}</span>
+                <span>{formatPrice(product.price)}</span>
+                <span className="text-base text-muted line-through">{formatPrice(product.price)}</span>
               </div>
             ) : (
               <span>{formatPrice(product.price)}</span>
             )}
           </div>
-          {product.short_description && (
+          {product.shortDescription && (
             <div
               className="prose-store mt-6 text-muted break-words"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.short_description) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.shortDescription) }}
             />
           )}
           <div className="mt-8">
             <AddToCartPanel product={product} />
           </div>
-          {product.attributes?.length > 0 && (
-            <div className="mt-10 rounded border border-line p-5">
-              <h2 className="font-semibold">Details</h2>
-              <dl className="mt-4 grid gap-3">
-                {product.attributes
-                  .filter((attribute) => attribute.visible !== false)
-                  .map((attribute) => (
-                    <div key={attribute.id || attribute.name} className="grid gap-1 sm:grid-cols-3">
-                      <dt className="text-sm text-muted">{attribute.name}</dt>
-                      <dd className="sm:col-span-2">{attribute.options.join(", ")}</dd>
-                    </div>
-                  ))}
-              </dl>
-            </div>
-          )}
         </section>
       </div>
 

@@ -9,15 +9,15 @@ import {
   useMemo,
   useState
 } from "react";
-import { CartItem, WCProduct } from "@/types/woocommerce";
+import { CartItem, Product } from "@/types/api";
 
 type CartContextValue = {
   items: CartItem[];
   itemCount: number;
   subtotal: number;
-  addItem: (product: WCProduct) => void;
-  removeItem: (id: number) => void;
-  updateQty: (id: number, qty: number) => void;
+  addItem: (product: Product) => void;
+  removeItem: (id: string) => void;
+  updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
 };
 
@@ -46,26 +46,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, loaded]);
 
-  const addItem = useCallback((product: WCProduct) => {
+  const addItem = useCallback((product: Product) => {
     setItems((current) => {
-      const existing = current.find((item) => item.product.id === product.id);
+      const existing = current.find((item) => item.product._id === product._id);
       if (existing) {
         return current.map((item) =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.product._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...current, { product, quantity: 1 }];
     });
   }, []);
 
-  const removeItem = useCallback((id: number) => {
-    setItems((current) => current.filter((item) => item.product.id !== id));
+  const removeItem = useCallback((id: string) => {
+    setItems((current) => current.filter((item) => item.product._id !== id));
   }, []);
 
-  const updateQty = useCallback((id: number, qty: number) => {
+  const updateQty = useCallback((id: string, qty: number) => {
     setItems((current) =>
       current.map((item) =>
-        item.product.id === id ? { ...item, quantity: Math.max(1, qty || 1) } : item
+        item.product._id === id ? { ...item, quantity: Math.max(1, qty || 1) } : item
       )
     );
   }, []);

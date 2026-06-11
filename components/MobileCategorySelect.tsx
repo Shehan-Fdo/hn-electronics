@@ -1,14 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { WCCategory } from "@/types/woocommerce";
+import { Category } from "@/types/api";
 
 export function MobileCategorySelect({
   categories,
-  activeCategorySlug
+  activeCategorySlug,
+  counts = {}
 }: {
-  categories: WCCategory[];
+  categories: Category[];
   activeCategorySlug?: string;
+  counts?: Record<string, number>;
 }) {
   const router = useRouter();
 
@@ -28,8 +30,8 @@ export function MobileCategorySelect({
       >
         <option value="">All products</option>
         {categories.map((category) => (
-          <option key={category.id} value={category.slug}>
-            {category.name} ({category.count})
+          <option key={category._id} value={category.slug}>
+            {category.name} ({counts[category._id] || 0})
           </option>
         ))}
       </select>

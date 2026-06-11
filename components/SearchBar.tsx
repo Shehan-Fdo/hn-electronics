@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { formatPrice, cn } from "@/lib/utils";
 
 type Suggestion = {
-  id: number;
+  slug: string;
   name: string;
   price: string;
   image: string | null;
@@ -124,9 +124,9 @@ export function SearchBar({
           ) : (
             <ul className="max-h-96 overflow-y-auto py-2">
               {suggestions.map((suggestion) => (
-                <li key={suggestion.id}>
+                <li key={suggestion.slug}>
                   <Link
-                    href={`/products/${suggestion.id}`}
+                    href={`/products/${suggestion.slug}`}
                     className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-50"
                     onClick={() => setIsOpen(false)}
                   >

@@ -5,17 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { WCProduct } from "@/types/woocommerce";
+import { Product } from "@/types/api";
 import { useCart } from "@/context/CartContext";
 import { formatPrice, productImageAlt } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { fade } from "@/components/Motion";
 
-export function ProductCard({ product }: { product: WCProduct }) {
+export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const image = product.images?.[0];
-  const onSale = Boolean(product.sale_price && product.sale_price !== product.regular_price);
+  const onSale = Boolean(product.price && product.price !== product.price);
 
   const [added, setAdded] = useState(false);
 
@@ -33,12 +33,12 @@ export function ProductCard({ product }: { product: WCProduct }) {
       className="group relative flex h-full flex-col"
       variants={fade}
     >
-      <Link href={`/products/${product.id}`} className="block overflow-hidden rounded border border-line bg-neutral-50">
+      <Link href={`/products/${product.slug}`} prefetch={false} className="block overflow-hidden rounded border border-line bg-neutral-50">
         <div className="relative aspect-square">
           {image ? (
             <Image
-              src={image.src}
-              alt={productImageAlt(product.name, image.alt)}
+              src={image}
+              alt={productImageAlt(product.name, product.name)}
               fill
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
               className="object-contain p-6 transition-transform duration-300 ease-in-out group-hover:scale-[1.025]"
@@ -53,14 +53,14 @@ export function ProductCard({ product }: { product: WCProduct }) {
         </div>
       </Link>
       <div className="flex flex-1 flex-col gap-3 pt-4">
-        <Link href={`/products/${product.id}`} className="line-clamp-2 min-h-11 font-medium leading-snug hover:text-accent">
+        <Link href={`/products/${product.slug}`} prefetch={false} className="line-clamp-2 min-h-11 font-medium leading-snug hover:text-accent">
           {product.name}
         </Link>
         <div className="text-sm">
           {onSale ? (
             <div className="flex flex-wrap items-center gap-2">
-              <span>{formatPrice(product.sale_price)}</span>
-              <span className="text-muted line-through">{formatPrice(product.regular_price)}</span>
+              <span>{formatPrice(product.price)}</span>
+              <span className="text-muted line-through">{formatPrice(product.price)}</span>
             </div>
           ) : (
             <span>{formatPrice(product.price)}</span>

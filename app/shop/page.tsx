@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { SortProducts } from "@/components/SortProducts";
 import { MobileCategorySelect } from "@/components/MobileCategorySelect";
 import { LinkButton } from "@/components/ui/Button";
-import { getCategories, getCategoryBySlug, getProducts } from "@/lib/woocommerce";
+import { getCategories, getCategoryBySlug, getProducts } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -16,26 +16,37 @@ export const metadata: Metadata = {
 type ShopParams = {
   category?: string;
   search?: string;
-  page?: string;
+  sort?: string;
 };
 
-function pageHref(params: ShopParams, page: number) {
-  const search = new URLSearchParams();
-  if (params.category) search.set("category", params.category);
-  if (params.search) search.set("search", params.search);
-  search.set("page", String(page));
-  return `/shop?${search.toString()}`;
-}
+// pageHref function removed since we are using infinite scrolling
 
 export default async function ShopPage({ searchParams }: { searchParams: ShopParams }) {
-  const page = Math.max(1, Number(searchParams.page || 1));
   const categories = await getCategories();
   const activeCategory = await getCategoryBySlug(searchParams.category, categories);
-  const products = await getProducts({
-    per_page: 20,
-    page,
-    category: activeCategory?.id,
-    search: searchParams.search
+  
+  let sortField = "createdAt";
+  let sortOrder: "asc" | "desc" = "desc";
+  if (searchParams.sort === "price-asc") {
+    sortField = "price";
+    sortOrder = "asc";
+  } else if (searchParams.sort === "price-desc") {
+    sortField = "price";
+    sortOrder = "desc";
+  }
+
+  const { data: products, facets, totalPages } = await getProducts({
+    limit: 20,
+    page: 1,
+    category: activeCategory?._id,
+    search: searchParams.search,
+    sort: sortField,
+    order: sortOrder
+  });
+
+  const categoryCounts: Record<string, number> = {};
+  facets?.categories?.forEach((f: any) => {
+    categoryCounts[f._id] = f.count;
   });
 
   return (
@@ -52,10 +63,10 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
-        <aside className="space-y-4">
+        <aside className="space-y-4 self-start lg:sticky lg:top-24">
           <div className="rounded border border-line bg-white p-4">
             <h2 className="font-semibold">Categories</h2>
-            <MobileCategorySelect categories={categories} activeCategorySlug={searchParams.category} />
+            <MobileCategorySelect categories={categories} activeCategorySlug={searchParams.category} counts={categoryCounts} />
             <div className="mt-4 hidden lg:grid gap-1">
               <Link
                 href="/shop"
@@ -66,19 +77,22 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
               >
                 All products
               </Link>
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/shop?category=${category.slug}`}
-                  className={cn(
-                    "flex items-center justify-between rounded px-3 py-2 text-sm hover:bg-neutral-100",
-                    searchParams.category === category.slug && "bg-ink text-white hover:bg-ink"
-                  )}
-                >
-                  <span>{category.name}</span>
-                  <span className="text-xs opacity-70">{category.count}</span>
-                </Link>
-              ))}
+              {categories.map((category) => {
+                const count = facets?.categories?.find((f: any) => f._id === category._id)?.count || 0;
+                return (
+                  <Link
+                    key={category._id}
+                    href={`/shop?category=${category.slug}`}
+                    className={cn(
+                      "flex items-center justify-between rounded px-3 py-2 text-sm hover:bg-neutral-100",
+                      searchParams.category === category.slug && "bg-ink text-white hover:bg-ink"
+                    )}
+                  >
+                    <span>{category.name}</span>
+                    <span className="text-xs opacity-70">{count}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </aside>
@@ -90,24 +104,12 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
               {activeCategory ? ` in ${activeCategory.name}` : ""}
             </p>
           </div>
-          <SortProducts products={products} />
-          <div className="mt-10 flex items-center justify-between border-t border-line pt-6">
-            {page > 1 ? (
-              <LinkButton href={pageHref(searchParams, page - 1)} variant="secondary">
-                Previous
-              </LinkButton>
-            ) : (
-              <span />
-            )}
-            <span className="text-sm text-muted">Page {page}</span>
-            {products.length === 20 ? (
-              <LinkButton href={pageHref(searchParams, page + 1)} variant="secondary">
-                Next
-              </LinkButton>
-            ) : (
-              <span />
-            )}
-          </div>
+          <SortProducts 
+            initialProducts={products} 
+            totalPages={totalPages} 
+            searchParams={searchParams} 
+            activeCategoryId={activeCategory?._id}
+          />
         </section>
       </div>
 
@@ -115,7 +117,11 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
         <h2 className="mb-6 text-2xl font-bold">Browse categories</h2>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {categories.slice(0, 8).map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard 
+              key={category._id} 
+              category={category} 
+              count={facets?.categories?.find((f: any) => f._id === category._id)?.count || 0}
+            />
           ))}
         </div>
       </section>

@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import { formatPrice, productImageAlt } from "@/lib/utils";
-import { CartItem } from "@/types/woocommerce";
+import { CartItem } from "@/types/api";
 import { fade, fadeUp, smoothEase, staggerContainer } from "@/components/Motion";
 
 function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
@@ -97,20 +97,20 @@ export function CartClient() {
             const lineTotal = Number(item.product.price || 0) * item.quantity;
             return (
               <motion.article
-                key={item.product.id}
+                key={item.product._id}
                 className="grid grid-cols-[112px_1fr] gap-4 rounded border border-line p-4 sm:grid-cols-[112px_1fr_auto] sm:items-center"
                 variants={fadeUp}
                 exit={{ opacity: 0, x: -12, transition: { duration: 0.18, ease: smoothEase } }}
                 layout
               >
                 <Link
-                  href={`/products/${item.product.id}`}
+                  href={`/products/${item.product.slug}`}
                   className="relative h-28 w-28 shrink-0 rounded border border-line bg-neutral-50"
                 >
                   {image ? (
                     <Image
-                      src={image.src}
-                      alt={productImageAlt(item.product.name, image.alt)}
+                      src={image}
+                      alt={item.product.name}
                       fill
                       sizes="112px"
                       className="object-contain p-2"
@@ -118,7 +118,7 @@ export function CartClient() {
                   ) : null}
                 </Link>
                 <div className="min-w-0">
-                  <Link href={`/products/${item.product.id}`} className="font-semibold hover:text-accent">
+                  <Link href={`/products/${item.product.slug}`} className="font-semibold hover:text-accent">
                     {item.product.name}
                   </Link>
                   <p className="mt-1 text-sm text-muted">{formatPrice(item.product.price)}</p>
@@ -128,8 +128,8 @@ export function CartClient() {
                       aria-label={`Decrease quantity for ${item.product.name}`}
                       onClick={() =>
                         item.quantity === 1
-                          ? removeItem(item.product.id)
-                          : updateQty(item.product.id, item.quantity - 1)
+                          ? removeItem(item.product._id)
+                          : updateQty(item.product._id, item.quantity - 1)
                       }
                     >
                       <Minus className="h-4 w-4" aria-hidden="true" />
@@ -140,12 +140,12 @@ export function CartClient() {
                       value={item.quantity}
                       min={1}
                       type="number"
-                      onChange={(event) => updateQty(item.product.id, Number(event.target.value))}
+                      onChange={(event) => updateQty(item.product._id, Number(event.target.value))}
                     />
                     <button
                       className="grid h-10 w-10 shrink-0 place-items-center"
                       aria-label={`Increase quantity for ${item.product.name}`}
-                      onClick={() => updateQty(item.product.id, item.quantity + 1)}
+                      onClick={() => updateQty(item.product._id, item.quantity + 1)}
                     >
                       <Plus className="h-4 w-4" aria-hidden="true" />
                     </button>
@@ -156,7 +156,7 @@ export function CartClient() {
                   <button
                     className="mt-0 rounded border border-line p-2 text-muted hover:text-ink sm:mt-4"
                     aria-label={`Remove ${item.product.name}`}
-                    onClick={() => removeItem(item.product.id)}
+                    onClick={() => removeItem(item.product._id)}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -203,7 +203,7 @@ export function CartClient() {
           </div>
           <div className="mt-6 space-y-3">
             {items.map((item) => (
-              <div key={item.product.id} className="flex justify-between gap-4 text-sm">
+              <div key={item.product._id} className="flex justify-between gap-4 text-sm">
                 <span className="text-muted">
                   {item.product.name} × {item.quantity}
                 </span>

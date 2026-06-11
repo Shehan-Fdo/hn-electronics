@@ -5,9 +5,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(value: string | number | undefined) {
-  const amount = Number(value || 0);
+  // Prices from the API are stored in cents without decimals, so divide by 100
+  const amount = Number(value || 0) / 100;
 
   return `Rs. ${new Intl.NumberFormat("en-LK", {
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
     maximumFractionDigits: amount % 1 === 0 ? 0 : 2
   }).format(amount)}`;
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProducts } from "@/lib/woocommerce";
+import { getProducts } from "@/lib/api";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,15 +10,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    const products = await getProducts({ search: q, per_page: 5 });
+    const { data: products } = await getProducts({ search: q, limit: 5 });
     
     // Map to a lightweight representation for the suggestions dropdown
     const suggestions = products.map((p) => ({
-      id: p.id,
+      slug: p.slug,
       name: p.name,
       price: p.price,
-      image: p.images?.[0]?.src || null,
-      alt: p.images?.[0]?.alt || p.name
+      image: p.images?.[0] || null,
+      alt: p.name
     }));
 
     return NextResponse.json(suggestions);

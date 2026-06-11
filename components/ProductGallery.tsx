@@ -3,11 +3,10 @@
 import Image from "next/image";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { WCImage } from "@/types/woocommerce";
 import { productImageAlt, cn } from "@/lib/utils";
 import { fade, smoothEase } from "@/components/Motion";
 
-export function ProductGallery({ images, name }: { images: WCImage[]; name: string }) {
+export function ProductGallery({ images, name }: { images: string[]; name: string }) {
   const [active, setActive] = useState(0);
   const current = images[active];
 
@@ -17,7 +16,7 @@ export function ProductGallery({ images, name }: { images: WCImage[]; name: stri
         <AnimatePresence mode="wait">
           {current ? (
             <motion.div
-              key={current.src}
+              key={current}
               className="absolute inset-0"
               variants={fade}
               initial="hidden"
@@ -25,8 +24,8 @@ export function ProductGallery({ images, name }: { images: WCImage[]; name: stri
               exit="exit"
             >
               <Image
-                src={current.src}
-                alt={productImageAlt(name, current.alt)}
+                src={current}
+                alt={name}
                 fill
                 priority
                 sizes="(min-width: 1024px) 50vw, 100vw"
@@ -44,7 +43,7 @@ export function ProductGallery({ images, name }: { images: WCImage[]; name: stri
         <div className="flex gap-3 overflow-x-auto pb-1">
           {images.map((image, index) => (
             <motion.button
-              key={image.id || image.src}
+              key={image}
               className={cn(
                 "relative h-20 w-20 shrink-0 rounded border bg-neutral-50",
                 index === active ? "border-ink" : "border-line"
@@ -54,7 +53,7 @@ export function ProductGallery({ images, name }: { images: WCImage[]; name: stri
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.12, ease: smoothEase }}
             >
-              <Image src={image.src} alt={productImageAlt(name, image.alt)} fill sizes="80px" className="object-contain p-2" />
+              <Image src={image} alt={name} fill sizes="80px" className="object-contain p-2" />
             </motion.button>
           ))}
         </div>

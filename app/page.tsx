@@ -4,7 +4,7 @@ import { ArrowRight, Tag, ShieldCheck, Truck, Zap } from "lucide-react";
 import { CategoryCard } from "@/components/CategoryCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { LinkButton } from "@/components/ui/Button";
-import { getCategories, getProducts } from "@/lib/woocommerce";
+import { getCategories, getProducts } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "HN Electronics",
@@ -12,12 +12,14 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [categories, products] = await Promise.all([
+  const [categories, productsRes] = await Promise.all([
     getCategories(),
-    getProducts({ per_page: 8 })
+    getProducts({ limit: 8 })
   ]);
+  const products = productsRes.data;
+  const facets = productsRes.facets;
 
-  const visibleCategories = categories.filter((category) => category.count > 0).slice(0, 8);
+  const visibleCategories = categories.slice(0, 8);
 
   return (
     <div>
@@ -61,7 +63,11 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {visibleCategories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard 
+              key={category._id} 
+              category={category} 
+              count={facets?.categories?.find((f: any) => f._id === category._id)?.count || 0}
+            />
           ))}
         </div>
       </section>
@@ -72,6 +78,11 @@ export default async function HomePage() {
           <h2 className="mt-2 text-3xl font-bold">Featured products</h2>
         </div>
         <ProductGrid products={products} />
+        <div className="mt-12 flex justify-center">
+          <LinkButton href="/shop" variant="secondary" size="lg">
+            View all products
+          </LinkButton>
+        </div>
       </section>
 
       <section className="border-y border-line">
