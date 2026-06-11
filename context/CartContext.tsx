@@ -31,7 +31,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(storageKey);
-      if (saved) setItems(JSON.parse(saved) as CartItem[]);
+      if (saved) {
+        const parsed = JSON.parse(saved) as any[];
+        // Validate schema: Old WooCommerce items had 'id', new ones have '_id'
+        const validItems = parsed.filter((item) => item?.product?._id);
+        setItems(validItems);
+      }
     } catch {
       // Corrupt or unreadable cart data — nuke it and start fresh
       window.localStorage.removeItem(storageKey);
