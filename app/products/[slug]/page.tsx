@@ -92,11 +92,6 @@ export default async function ProductPage({ params }: { params: { slug: string }
             <p className="text-2xl font-semibold text-accent">{formatPrice(product.price)}</p>
           </div>
           
-          <div className="mt-6 flex items-center gap-2">
-            <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-            <span className="text-sm font-medium">In Stock</span>
-          </div>
-
           <div className="mt-8 flex flex-col gap-4">
             <AddToCartPanel product={product} />
             <a
