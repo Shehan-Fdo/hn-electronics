@@ -4,7 +4,8 @@ import { ArrowRight, Tag, ShieldCheck, Truck, Zap } from "lucide-react";
 import { CategoryCard } from "@/components/CategoryCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { LinkButton } from "@/components/ui/Button";
-import { getCategories, getProducts } from "@/lib/api";
+import { HeroSlider } from "@/components/HeroSlider";
+import { getCategories, getProducts, getSettings } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "HN Electronics",
@@ -12,9 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [categories, productsRes] = await Promise.all([
+  const [categories, productsRes, settings] = await Promise.all([
     getCategories(),
-    getProducts({ limit: 8 })
+    getProducts({ limit: 8 }),
+    getSettings()
   ]);
   const products = productsRes.data;
   const facets = productsRes.facets;
@@ -23,35 +25,12 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-ink text-white">
-        <Image
-          src="/hero-bg.png"
-          alt="Circuit board background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover opacity-50"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="max-w-4xl">
-            <p className="text-sm uppercase tracking-normal text-accent">HN Electronics Sri Lanka</p>
-            <h1 className="mt-5 max-w-3xl text-5xl font-bold leading-[1.02] sm:text-6xl lg:text-7xl">
-              Your Electronics Destination.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
-              Discover reliable electronics, parts, accessories, and everyday tech essentials with a clean shopping experience.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <LinkButton href="/shop" size="lg">
-                Shop Now <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </LinkButton>
-              <LinkButton href="/shop#categories" size="lg" className="bg-white/10 text-white hover:bg-white/20 hover:text-white border-0">
-                Browse Categories
-              </LinkButton>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSlider 
+        title={settings?.heroTitle}
+        subtitle={settings?.heroSubtitle}
+        textColor={settings?.heroTextColor || 'white'}
+        images={settings?.heroBackgroundUrls?.length > 0 ? settings.heroBackgroundUrls : ['/hero-bg.png']}
+      />
 
       <section id="categories" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-end justify-between gap-4">

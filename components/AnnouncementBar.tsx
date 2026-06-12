@@ -1,6 +1,4 @@
-export function AnnouncementBar() {
-  const text = process.env.NEXT_PUBLIC_ANNOUNCEMENT_TEXT;
-
+export function AnnouncementBar({ text }: { text?: string }) {
   if (!text) return null;
 
   return (

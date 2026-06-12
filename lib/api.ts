@@ -85,6 +85,18 @@ export async function getCategories(): Promise<Category[]> {
   return apiFetch<Category[]>("/categories");
 }
 
+export async function getSettings() {
+  try {
+    const res = await fetch(`${baseUrl}/settings`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.data;
+  } catch (error) {
+    console.error('Failed to fetch settings:', error);
+    return null;
+  }
+}
+
 export async function getCategoryBySlug(slug?: string, categories?: Category[]) {
   if (!slug) return undefined;
   const list = categories ?? (await getCategories());

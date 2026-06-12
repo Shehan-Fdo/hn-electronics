@@ -10,6 +10,7 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice, productImageAlt } from "@/lib/utils";
 import { CartItem } from "@/types/api";
 import { fade, fadeUp, smoothEase, staggerContainer } from "@/components/Motion";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 
 function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
   const lines = items.map((item, index) => {
@@ -43,10 +44,10 @@ function buildCopyMessage(items: CartItem[], subtotal: number) {
   ].join("\n");
 }
 
-export function CartClient() {
+export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
   const { items, subtotal, removeItem, updateQty, clearCart } = useCart();
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
   const [copied, setCopied] = useState(false);
+  const [isOrdering, setIsOrdering] = useState(false);
 
   function handleCopy() {
     const text = buildCopyMessage(items, subtotal);
@@ -60,8 +61,12 @@ export function CartClient() {
       alert("WhatsApp ordering is not available right now. Please contact us directly.");
       return;
     }
-    const message = encodeURIComponent(buildWhatsAppMessage(items, subtotal));
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank", "noopener,noreferrer");
+    setIsOrdering(true);
+    const message = buildWhatsAppMessage(items, subtotal);
+    setTimeout(() => {
+      setIsOrdering(false);
+      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    }, 1000);
   }
 
   if (!items.length) {
@@ -226,7 +231,7 @@ export function CartClient() {
           </div>
           <p className="mt-4 text-sm text-muted">No payment is processed here. Complete your order via WhatsApp.</p>
           <Button className="mt-6" fullWidth variant="whatsapp" onClick={orderViaWhatsApp}>
-            <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            <WhatsAppIcon className="h-5 w-5" aria-hidden="true" />
             Order via WhatsApp
           </Button>
         </motion.aside>

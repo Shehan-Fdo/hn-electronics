@@ -9,6 +9,8 @@ import { CartProvider } from "@/context/CartContext";
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 
 
+import { getSettings } from "@/lib/api";
+
 export const metadata: Metadata = {
   title: {
     default: "HN Electronics",
@@ -32,12 +34,14 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSettings();
+
   return (
     <html lang="en" className={`${dmSans.variable}`}>
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <CartProvider>
-          <AnnouncementBar />
+          <AnnouncementBar text={settings?.announcementText} />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
