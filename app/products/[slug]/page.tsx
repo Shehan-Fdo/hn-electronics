@@ -1,5 +1,6 @@
 import { AddToCartPanel } from "@/components/AddToCartPanel";
 import { ProductGrid } from "@/components/ProductGrid";
+import { ProductGallery } from "@/components/ProductGallery";
 import { formatPrice, sanitizeHtml, stripHtml } from "@/lib/utils";
 import { getProduct, getProducts, getCategories, getSettings } from "@/lib/api";
 import { notFound } from "next/navigation";
@@ -64,21 +65,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-16">
         {/* Product Images */}
-        <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
-          {product.images[0] ? (
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              priority
-              className="object-contain"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-slate-100">
-              <span className="text-muted">No image</span>
-            </div>
-          )}
-        </div>
+        <ProductGallery images={product.images} name={product.name} />
 
         {/* Product Info */}
         <div className="mt-10 lg:mt-0">
