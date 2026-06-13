@@ -40,6 +40,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
   // Find category path
   const categoryId = product.categoryIds?.[0];
   const category = categories.find((c: any) => c._id === categoryId);
+  const productCategories = product.categoryIds
+    ?.map((id: string) => categories.find((c: any) => c._id === id))
+    .filter(Boolean);
+
   const breadcrumb = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
@@ -69,9 +73,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
         {/* Product Info */}
         <div className="mt-10 lg:mt-0">
-          {category && (
-            <div className="mb-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-800">
-              {category.name}
+          {productCategories && productCategories.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {productCategories.map((cat: any) => (
+                <div key={cat._id} className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-800">
+                  {cat.name}
+                </div>
+              ))}
             </div>
           )}
           <h1 className="text-3xl font-bold sm:text-4xl">{product.name}</h1>
