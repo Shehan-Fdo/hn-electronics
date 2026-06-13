@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
               href={`https://wa.me/${settings?.whatsappNumber || '94770000000'}?text=${encodeURIComponent(`Hi, I'm interested in ${product.name} (${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug})`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded bg-[#25D366] px-8 py-3.5 text-sm font-medium text-white hover:bg-[#20BD5A] focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded border border-[#25D366] bg-[#25D366] px-8 py-3.5 text-sm font-medium text-white hover:bg-white hover:text-ink focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 transition-colors"
             >
               <WhatsAppIcon className="h-5 w-5" />
               Ask about this on WhatsApp
