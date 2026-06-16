@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check } from "lucide-react";
+import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check, FileText, Receipt } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -11,6 +11,7 @@ import { formatPrice, productImageAlt } from "@/lib/utils";
 import { CartItem } from "@/types/api";
 import { fade, fadeUp, smoothEase, staggerContainer } from "@/components/Motion";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
   const lines = items.map((item, index) => {
@@ -48,6 +49,8 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
   const { items, subtotal, removeItem, updateQty, clearCart } = useCart();
   const [copied, setCopied] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
+  const { isAdmin, token, isReady } = useAdminAuth();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   function handleCopy() {
     const text = buildCopyMessage(items, subtotal);
@@ -67,6 +70,34 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
       setIsOrdering(false);
       window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
     }, 1000);
+  }
+
+  async function generateDocument(type: 'invoice' | 'pos') {
+    if (!token) return;
+    setIsGenerating(true);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.hnelectronics.lk/api";
+      const cartData = { items, total: subtotal };
+      
+      const res = await fetch(`${baseUrl}/documents/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ cartData, type })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to generate document");
+      
+      // Open the generated PDF in a new tab
+      window.open(data.data.url, "_blank");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   if (!items.length) {
@@ -208,7 +239,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
           </div>
           <div className="mt-6 space-y-3">
             {items.map((item) => (
-              <div key={item.product._id} className="flex justify-between gap-4 text-sm">
+               <div key={item.product._id} className="flex justify-between gap-4 text-sm">
                 <span className="text-muted">
                   {item.product.name} × {item.quantity}
                 </span>
@@ -234,6 +265,34 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
             <WhatsAppIcon className="h-5 w-5" aria-hidden="true" />
             Order via WhatsApp
           </Button>
+
+          {isReady && isAdmin && (
+            <div className="mt-6 border-t border-line pt-6">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted">Admin Controls</h3>
+              <div className="flex gap-2">
+                <Button 
+                  fullWidth 
+                  variant="secondary" 
+                  disabled={isGenerating}
+                  onClick={() => generateDocument('invoice')}
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  Invoice
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="secondary" 
+                  disabled={isGenerating}
+                  onClick={() => generateDocument('pos')}
+                  className="flex items-center gap-2"
+                >
+                  <Receipt className="h-4 w-4" />
+                  POS Receipt
+                </Button>
+              </div>
+            </div>
+          )}
         </motion.aside>
       </div>
     </motion.div>
