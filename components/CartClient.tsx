@@ -53,6 +53,8 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
   const { isAdmin, token, isReady } = useAdminAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [draftName, setDraftName] = useState("");
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -143,9 +145,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
   }
 
   async function handleSaveDraft() {
-    if (!token) return;
-    const name = window.prompt("Enter a name for this draft cart:");
-    if (!name?.trim()) return;
+    if (!token || !draftName.trim()) return;
 
     setIsSaving(true);
     try {
@@ -163,13 +163,15 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ name: name.trim(), items: draftItems, total: subtotal })
+        body: JSON.stringify({ name: draftName.trim(), items: draftItems, total: subtotal })
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to save draft cart");
       
       alert("Draft cart saved successfully!");
+      setIsDrafting(false);
+      setDraftName("");
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -285,15 +287,42 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
             <h2 className="text-2xl font-bold">Order Summary</h2>
             <div className="flex items-center gap-2">
               {isAdmin && isReady && (
-                <button
-                  onClick={handleSaveDraft}
-                  disabled={isSaving}
-                  className="flex items-center justify-center text-muted transition-colors hover:text-ink disabled:opacity-50"
-                  aria-label="Save draft cart"
-                  title="Save draft cart"
-                >
-                  <Bookmark className="h-5 w-5" />
-                </button>
+                isDrafting ? (
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      placeholder="Draft name..."
+                      className="h-8 w-32 sm:w-40 rounded border border-line px-2 text-sm outline-none focus:border-ink bg-transparent"
+                      autoFocus
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveDraft()}
+                    />
+                    <button
+                      onClick={handleSaveDraft}
+                      disabled={isSaving || !draftName.trim()}
+                      className="text-sm font-semibold text-accent hover:text-ink disabled:opacity-50 transition-colors"
+                    >
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => { setIsDrafting(false); setDraftName(""); }}
+                      disabled={isSaving}
+                      className="text-sm text-muted hover:text-ink transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsDrafting(true)}
+                    className="flex items-center justify-center text-muted transition-colors hover:text-ink"
+                    aria-label="Save draft cart"
+                    title="Save draft cart"
+                  >
+                    <Bookmark className="h-5 w-5" />
+                  </button>
+                )
               )}
               <button
                 onClick={handleCopy}
