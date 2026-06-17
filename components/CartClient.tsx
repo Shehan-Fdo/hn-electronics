@@ -55,6 +55,15 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDrafting, setIsDrafting] = useState(false);
   const [draftName, setDraftName] = useState("");
+  const [statusMessage, setStatusMessage] = useState<{type: 'error' | 'success', text: string} | null>(null);
+
+  // Auto-clear status message after 5 seconds
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -97,7 +106,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
 
   function orderViaWhatsApp() {
     if (!whatsappNumber) {
-      alert("WhatsApp ordering is not available right now. Please contact us directly.");
+      setStatusMessage({ type: 'error', text: "WhatsApp ordering is not available right now. Please contact us directly." });
       return;
     }
     setIsOrdering(true);
@@ -138,7 +147,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
       // Open the generated PDF in a new tab
       window.open(data.data.url, "_blank");
     } catch (err: any) {
-      alert(err.message);
+      setStatusMessage({ type: 'error', text: err.message || "An error occurred" });
     } finally {
       setIsGenerating(false);
     }
@@ -169,11 +178,11 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to save draft cart");
       
-      alert("Draft cart saved successfully!");
+      setStatusMessage({ type: 'success', text: "Draft cart saved successfully!" });
       setIsDrafting(false);
       setDraftName("");
     } catch (err: any) {
-      alert(err.message);
+      setStatusMessage({ type: 'error', text: err.message || "An error occurred" });
     } finally {
       setIsSaving(false);
     }
@@ -286,43 +295,15 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Order Summary</h2>
             <div className="flex items-center gap-2">
-              {isAdmin && isReady && (
-                isDrafting ? (
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      value={draftName}
-                      onChange={(e) => setDraftName(e.target.value)}
-                      placeholder="Draft name..."
-                      className="h-8 w-32 sm:w-40 rounded border border-line px-2 text-sm outline-none focus:border-ink bg-transparent"
-                      autoFocus
-                      onKeyDown={(e) => e.key === 'Enter' && handleSaveDraft()}
-                    />
-                    <button
-                      onClick={handleSaveDraft}
-                      disabled={isSaving || !draftName.trim()}
-                      className="text-sm font-semibold text-accent hover:text-ink disabled:opacity-50 transition-colors"
-                    >
-                      {isSaving ? 'Saving...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={() => { setIsDrafting(false); setDraftName(""); }}
-                      disabled={isSaving}
-                      className="text-sm text-muted hover:text-ink transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsDrafting(true)}
-                    className="flex items-center justify-center text-muted transition-colors hover:text-ink"
-                    aria-label="Save draft cart"
-                    title="Save draft cart"
-                  >
-                    <Bookmark className="h-5 w-5" />
-                  </button>
-                )
+              {isAdmin && isReady && !isDrafting && (
+                <button
+                  onClick={() => setIsDrafting(true)}
+                  className="flex items-center justify-center text-muted transition-colors hover:text-ink"
+                  aria-label="Save draft cart"
+                  title="Save draft cart"
+                >
+                  <Bookmark className="h-5 w-5" />
+                </button>
               )}
               <button
                 onClick={handleCopy}
@@ -356,6 +337,54 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
             </button>
             </div>
           </div>
+          
+          <AnimatePresence>
+            {statusMessage && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className={`overflow-hidden rounded-md border ${
+                  statusMessage.type === 'success' 
+                    ? 'bg-green-50 text-green-700 border-green-200' 
+                    : 'bg-red-50 text-red-700 border-red-200'
+                }`}
+              >
+                <div className="px-3 py-2 text-[13px] font-medium">
+                  {statusMessage.text}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {isAdmin && isReady && isDrafting && (
+            <div className="mt-4 flex items-center gap-2 bg-neutral-50/50 p-2 rounded-md border border-line">
+              <input 
+                type="text" 
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                placeholder="Draft name..."
+                className="flex-1 h-8 rounded border border-line px-2.5 text-[13px] outline-none focus:border-ink bg-white transition-colors"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveDraft()}
+              />
+              <button
+                onClick={handleSaveDraft}
+                disabled={isSaving || !draftName.trim()}
+                className="px-3 py-1.5 text-[13px] font-medium text-white bg-ink hover:bg-neutral-800 rounded transition-colors disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={() => { setIsDrafting(false); setDraftName(""); }}
+                disabled={isSaving}
+                className="px-3 py-1.5 text-[13px] font-medium text-muted bg-white border border-line hover:bg-neutral-50 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
           <div className="mt-6 space-y-3">
             {items.map((item) => (
                <div key={item.product._id} className="flex justify-between gap-4 text-sm">
