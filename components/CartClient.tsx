@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check, FileText, Receipt } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check, FileText, Receipt, Bookmark } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -46,11 +47,44 @@ function buildCopyMessage(items: CartItem[], subtotal: number) {
 }
 
 export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
-  const { items, subtotal, removeItem, updateQty, clearCart } = useCart();
+  const { items, subtotal, removeItem, updateQty, clearCart, replaceCart } = useCart();
   const [copied, setCopied] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
   const { isAdmin, token, isReady } = useAdminAuth();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Handle Draft Restoration
+  useEffect(() => {
+    const draftId = searchParams?.get('draftId');
+    if (!draftId) return;
+
+    const fetchDraft = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.hnelectronics.lk/api";
+        const res = await fetch(`${baseUrl}/draft-carts/${draftId}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && json.data.items) {
+            // Re-map items to standard CartItem shape
+            const loadedItems = json.data.items.map((i: any) => ({
+              product: i.product,
+              quantity: i.quantity
+            }));
+            replaceCart(loadedItems);
+          }
+        }
+        // Remove draftId from URL so it doesn't refetch
+        router.replace('/cart');
+      } catch (err) {
+        console.error("Failed to restore draft cart", err);
+      }
+    };
+    fetchDraft();
+  }, [searchParams, replaceCart, router]);
 
   function handleCopy() {
     const text = buildCopyMessage(items, subtotal);
@@ -105,6 +139,41 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
       alert(err.message);
     } finally {
       setIsGenerating(false);
+    }
+  }
+
+  async function handleSaveDraft() {
+    if (!token) return;
+    const name = window.prompt("Enter a name for this draft cart:");
+    if (!name?.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.hnelectronics.lk/api";
+      // Format items for the backend
+      const draftItems = items.map(item => ({
+        product: item.product._id,
+        quantity: item.quantity,
+        price: item.product.price || 0
+      }));
+
+      const res = await fetch(`${baseUrl}/draft-carts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: name.trim(), items: draftItems, total: subtotal })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to save draft cart");
+      
+      alert("Draft cart saved successfully!");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -214,12 +283,24 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
         <motion.aside className="h-fit rounded border border-line p-6" variants={fadeUp}>
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Order Summary</h2>
-            <button
-              onClick={handleCopy}
-              className="flex items-center justify-center text-muted transition-colors hover:text-ink"
-              aria-label="Copy order summary"
-              title="Copy order summary"
-            >
+            <div className="flex items-center gap-2">
+              {isAdmin && isReady && (
+                <button
+                  onClick={handleSaveDraft}
+                  disabled={isSaving}
+                  className="flex items-center justify-center text-muted transition-colors hover:text-ink disabled:opacity-50"
+                  aria-label="Save draft cart"
+                  title="Save draft cart"
+                >
+                  <Bookmark className="h-5 w-5" />
+                </button>
+              )}
+              <button
+                onClick={handleCopy}
+                className="flex items-center justify-center text-muted transition-colors hover:text-ink"
+                aria-label="Copy order summary"
+                title="Copy order summary"
+              >
               <AnimatePresence mode="wait" initial={false}>
                 {copied ? (
                   <motion.div
@@ -244,6 +325,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
                 )}
               </AnimatePresence>
             </button>
+            </div>
           </div>
           <div className="mt-6 space-y-3">
             {items.map((item) => (
