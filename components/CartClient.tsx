@@ -89,7 +89,15 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to generate document");
+      if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('userRole');
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(data.message || "Failed to generate document");
+      }
       
       // Open the generated PDF in a new tab
       window.open(data.data.url, "_blank");
