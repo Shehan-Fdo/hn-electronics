@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getProducts, getCategories } from '@/lib/api';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hnelectronics.lk';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch dynamic data

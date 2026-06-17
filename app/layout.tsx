@@ -12,6 +12,10 @@ const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 import { getSettings } from "@/lib/api";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk'),
+  alternates: {
+    canonical: '/',
+  },
   title: {
     default: "HN Electronics",
     template: "%s | HN Electronics"
@@ -34,11 +38,27 @@ export const metadata: Metadata = {
   }
 };
 
+import Script from "next/script";
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
 
   return (
     <html lang="en" className={`${dmSans.variable}`}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-4QKFPV08PX"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-4QKFPV08PX');
+          `}
+        </Script>
+      </head>
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <CartProvider>
           <AnnouncementBar text={settings?.announcementText} />
