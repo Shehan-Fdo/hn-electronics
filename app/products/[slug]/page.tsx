@@ -50,8 +50,27 @@ export default async function ProductPage({ params }: { params: { slug: string }
     { name: product.name, href: "#" },
   ];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images[0] || '',
+    description: stripHtml(product.description).slice(0, 160),
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'LKR',
+      availability: 'https://schema.org/InStock',
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk'}/products/${product.slug}`
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="mb-8 flex text-sm text-muted">
         <ol className="flex items-center space-x-2">
