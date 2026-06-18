@@ -35,7 +35,7 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
     sortOrder = "desc";
   }
 
-  const { data: products, facets, totalPages } = await getProducts({
+  const { data: products, facets, totalPages, total } = await getProducts({
     limit: 20,
     page: 1,
     category: searchParams.category, // Pass comma-separated string natively
@@ -73,7 +73,7 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
         <section>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-muted">
-              Showing {products.length} product{products.length === 1 ? "" : "s"}
+              Showing {total} product{total === 1 ? "" : "s"}
               {activeCategories.length > 0 ? ` in ${activeCategories.map(c => c.name).join(", ")}` : ""}
             </p>
           </div>

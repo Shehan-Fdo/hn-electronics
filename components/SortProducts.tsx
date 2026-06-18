@@ -86,31 +86,7 @@ export function SortProducts({
     }
   }
 
-  const [localSearch, setLocalSearch] = useState(searchParams.search || "");
 
-  // Debounce search changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localSearch !== (searchParams.search || "")) {
-        handleSearchChange(localSearch);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [localSearch]);
-
-  // Sync local search when URL changes externally
-  useEffect(() => {
-    setLocalSearch(searchParams.search || "");
-  }, [searchParams.search]);
-
-  function handleSearchChange(searchVal: string) {
-    const params = new URLSearchParams();
-    if (searchParams.category) params.set("category", searchParams.category);
-    if (searchVal) params.set("search", searchVal);
-    if (searchParams.sort && searchParams.sort !== "default") params.set("sort", searchParams.sort);
-    
-    router.push(`/shop?${params.toString()}`);
-  }
 
   function handleSortChange(sortVal: string) {
     const params = new URLSearchParams();
@@ -123,16 +99,7 @@ export function SortProducts({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className="h-11 w-full rounded border border-line bg-white px-3 text-sm outline-none focus:border-ink"
-          />
-        </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-end">
         <select
           aria-label="Sort products"
           className="h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-ink"
