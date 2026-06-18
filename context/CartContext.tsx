@@ -18,6 +18,7 @@ type CartContextValue = {
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
+  toggleWholesale: (id: string, useWholesale: boolean) => void;
   clearCart: () => void;
   replaceCart: (items: CartItem[]) => void;
 };
@@ -76,6 +77,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const toggleWholesale = useCallback((id: string, useWholesale: boolean) => {
+    setItems((current) =>
+      current.map((item) =>
+        item.product._id === id ? { ...item, useWholesale } : item
+      )
+    );
+  }, []);
+
   const clearCart = useCallback(() => setItems([]), []);
   const replaceCart = useCallback((newItems: CartItem[]) => setItems(newItems), []);
 
@@ -84,16 +93,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       itemCount: items.reduce((total, item) => total + item.quantity, 0),
       subtotal: items.reduce(
-        (total, item) => total + Number(item.product.price || 0) * item.quantity,
+        (total, item) => {
+          const itemPrice = item.useWholesale && item.product.wholesalePrice 
+            ? item.product.wholesalePrice 
+            : item.product.price;
+          return total + Number(itemPrice || 0) * item.quantity;
+        },
         0
       ),
       addItem,
       removeItem,
       updateQty,
+      toggleWholesale,
       clearCart,
       replaceCart
     }),
-    [addItem, clearCart, items, removeItem, updateQty, replaceCart]
+    [addItem, clearCart, items, removeItem, updateQty, toggleWholesale, replaceCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

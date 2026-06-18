@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check, FileText, Receipt, Bookmark } from "lucide-react";
+import { MessageCircle, Minus, Plus, ShoppingCart, Trash2, Copy, Check, FileText, Receipt, Bookmark, Tag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -16,8 +16,10 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
   const lines = items.map((item, index) => {
-    const lineTotal = Number(item.product.price || 0) * item.quantity;
-    return `${index + 1}. ${item.product.name} × ${item.quantity} — ${formatPrice(lineTotal)}`;
+    const itemPrice = item.useWholesale && item.product.wholesalePrice ? item.product.wholesalePrice : item.product.price;
+    const lineTotal = Number(itemPrice || 0) * item.quantity;
+    const suffix = item.useWholesale ? " (Wholesale)" : "";
+    return `${index + 1}. ${item.product.name}${suffix} × ${item.quantity} — ${formatPrice(lineTotal)}`;
   });
 
   return [
@@ -34,8 +36,10 @@ function buildWhatsAppMessage(items: CartItem[], subtotal: number) {
 
 function buildCopyMessage(items: CartItem[], subtotal: number) {
   const lines = items.map((item, index) => {
-    const lineTotal = Number(item.product.price || 0) * item.quantity;
-    return `${index + 1}. ${item.product.name} × ${item.quantity} — ${formatPrice(lineTotal)}`;
+    const itemPrice = item.useWholesale && item.product.wholesalePrice ? item.product.wholesalePrice : item.product.price;
+    const lineTotal = Number(itemPrice || 0) * item.quantity;
+    const suffix = item.useWholesale ? " (Wholesale)" : "";
+    return `${index + 1}. ${item.product.name}${suffix} × ${item.quantity} — ${formatPrice(lineTotal)}`;
   });
 
   return [
@@ -47,7 +51,7 @@ function buildCopyMessage(items: CartItem[], subtotal: number) {
 }
 
 export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
-  const { items, subtotal, removeItem, updateQty, clearCart, replaceCart } = useCart();
+  const { items, subtotal, removeItem, updateQty, clearCart, replaceCart, toggleWholesale } = useCart();
   const [copied, setCopied] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
   const { isAdmin, token, isReady } = useAdminAuth();
@@ -218,7 +222,8 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
           <AnimatePresence initial={false}>
           {items.map((item) => {
             const image = item.product.images?.[0];
-            const lineTotal = Number(item.product.price || 0) * item.quantity;
+            const itemPrice = item.useWholesale && item.product.wholesalePrice ? item.product.wholesalePrice : item.product.price;
+            const lineTotal = Number(itemPrice || 0) * item.quantity;
             return (
               <motion.article
                 key={item.product._id}
@@ -276,14 +281,35 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
                   </div>
                 </div>
                 <div className="col-span-2 flex items-center justify-between gap-4 border-t border-line pt-4 sm:col-span-1 sm:block sm:border-0 sm:pt-0 sm:text-right">
-                  <p className="font-semibold">{formatPrice(lineTotal)}</p>
-                  <button
-                    className="mt-0 rounded border border-line p-2 text-muted hover:text-ink sm:mt-4"
-                    aria-label={`Remove ${item.product.name}`}
-                    onClick={() => removeItem(item.product._id)}
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                  <p className="font-semibold">
+                    {formatPrice(lineTotal)}
+                  </p>
+                  <div className="mt-0 flex items-center justify-end gap-2 sm:mt-4">
+                    {isAdmin && isReady && (
+                      <button
+                        className={`rounded border p-2 transition-colors ${
+                          !item.product.wholesalePrice
+                            ? "border-line text-muted opacity-50 cursor-not-allowed bg-neutral-50"
+                            : item.useWholesale 
+                              ? "border-green-500 bg-green-50 text-green-700" 
+                              : "border-line text-muted hover:text-ink hover:bg-neutral-50"
+                        }`}
+                        aria-label={`Toggle wholesale price for ${item.product.name}`}
+                        title={item.product.wholesalePrice ? "Toggle Wholesale Price" : "No Wholesale Price"}
+                        disabled={!item.product.wholesalePrice}
+                        onClick={() => toggleWholesale(item.product._id, !item.useWholesale)}
+                      >
+                        <Tag className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    )}
+                    <button
+                      className="rounded border border-line p-2 text-muted hover:text-ink"
+                      aria-label={`Remove ${item.product.name}`}
+                      onClick={() => removeItem(item.product._id)}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               </motion.article>
             );
@@ -392,7 +418,7 @@ export function CartClient({ whatsappNumber }: { whatsappNumber?: string }) {
                   {item.product.name} × {item.quantity}
                 </span>
                 <span className="shrink-0">
-                  {formatPrice(Number(item.product.price || 0) * item.quantity)}
+                  {formatPrice(Number(item.useWholesale && item.product.wholesalePrice ? item.product.wholesalePrice : item.product.price || 0) * item.quantity)}
                 </span>
               </div>
             ))}

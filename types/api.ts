@@ -11,6 +11,7 @@ export type Product = {
   name: string;
   slug: string;
   price: number;
+  wholesalePrice?: number;
   images: string[];
   categoryIds: string[];
   shortDescription?: string;
@@ -31,4 +32,5 @@ export type ProductQuery = {
 export type CartItem = {
   product: Product;
   quantity: number;
+  useWholesale?: boolean;
 };
