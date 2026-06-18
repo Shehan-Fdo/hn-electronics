@@ -1,8 +1,8 @@
 import { AddToCartPanel } from "@/components/AddToCartPanel";
-import { ProductGrid } from "@/components/ProductGrid";
+import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductGallery } from "@/components/ProductGallery";
 import { formatPrice, sanitizeHtml, stripHtml } from "@/lib/utils";
-import { getProduct, getProducts, getCategories, getSettings } from "@/lib/api";
+import { getProduct, getProducts, getCategories, getSettings, getRelatedProducts } from "@/lib/api";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
@@ -28,14 +28,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const [product, productsRes, categories, settings] = await Promise.all([
-    getProduct(params.slug),
-    getProducts({ limit: 4 }),
+  const product = await getProduct(params.slug);
+  if (!product) notFound();
+
+  const [relatedProducts, categories, settings] = await Promise.all([
+    getRelatedProducts(product.slug, 8),
     getCategories(),
     getSettings()
   ]);
-
-  if (!product) notFound();
 
   // Find category path
   const categoryId = product.categoryIds?.[0];
@@ -143,12 +143,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
         </section>
       )}
 
-      {productsRes.data.length > 0 && (
-        <section className="mt-16 sm:mt-24 border-t border-line pt-16 sm:pt-24">
-          <h2 className="mb-8 text-2xl font-bold">You might also like</h2>
-          <ProductGrid products={productsRes.data.filter((p: any) => p._id !== product._id).slice(0, 4)} />
-        </section>
-      )}
+      <section className="mt-16 sm:mt-24 border-t border-line pt-16 sm:pt-24">
+        <h2 className="mb-8 text-2xl font-bold">You might also like</h2>
+        <RelatedProducts 
+          key={product._id}
+          relatedProducts={relatedProducts || []} 
+        />
+      </section>
     </div>
   );
 }
