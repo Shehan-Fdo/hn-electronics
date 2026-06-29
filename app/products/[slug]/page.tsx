@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Metadata } from "next";
 import { ShieldCheck, Truck, Tag, Zap } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { marked } from "marked";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProduct(params.slug);
@@ -102,6 +103,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
           )}
           <h1 className="text-3xl font-bold sm:text-4xl">{product.name}</h1>
+          {product.shortDescription && (
+            <p className="mt-2 text-sm text-slate-600 leading-relaxed">{product.shortDescription}</p>
+          )}
           <div className="mt-4 flex items-center gap-4">
             <p className="text-2xl font-semibold text-accent">{formatPrice(product.price)}</p>
           </div>
@@ -140,7 +144,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       {product.description && (
         <section className="mt-8 border-t border-line pt-8 sm:mt-12 sm:pt-10">
           <h2 className="text-2xl font-bold">Description</h2>
-          <div className="prose-store mt-6 max-w-4xl" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description) }} />
+          <div className="prose-store mt-6 max-w-4xl" dangerouslySetInnerHTML={{ __html: sanitizeHtml(marked.parse(product.description) as string) }} />
         </section>
       )}
 
