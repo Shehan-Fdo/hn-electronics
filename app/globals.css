@@ -191,3 +191,14 @@ img {
   background-color: transparent;
   color: inherit;
 }
+
+@media (max-width: 640px) {
+  .mask-fade-out {
+    display: inline-block;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0) 100%);
+  }
+}

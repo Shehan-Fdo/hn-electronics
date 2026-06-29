@@ -74,12 +74,19 @@ export default async function ProductPage({ params }: { params: { slug: string }
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Breadcrumb */}
-      <nav className="mb-8 flex text-sm text-muted">
-        <ol className="flex items-center space-x-2">
+      <nav className="mb-8 flex text-sm text-muted min-w-0">
+        <ol className="flex items-center space-x-2 min-w-0">
           {breadcrumb.map((item, index) => (
-            <li key={item.name} className="flex items-center">
-              {index > 0 && <span className="mx-2">/</span>}
-              <a href={item.href} className="hover:text-ink">
+            <li key={item.name} className="flex items-center min-w-0">
+              {index > 0 && <span className="mx-2 shrink-0">/</span>}
+              <a
+                href={item.href}
+                className={
+                  index === breadcrumb.length - 1
+                    ? "hover:text-ink mask-fade-out"
+                    : "hover:text-ink shrink-0"
+                }
+              >
                 {item.name}
               </a>
             </li>
