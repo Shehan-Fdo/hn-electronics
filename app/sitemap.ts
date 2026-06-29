@@ -1,11 +1,32 @@
 import { MetadataRoute } from 'next';
 import { getProducts, getCategories } from '@/lib/api';
+import { Product } from '@/types/api';
+
+export const revalidate = 60;
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch dynamic data
-  const { data: products } = await getProducts({ limit: 5000 });
+  // Fetch dynamic data page by page to bypass backend limit
+  const products: Product[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  try {
+    do {
+      const response = await getProducts({ limit: 100, page });
+      if (response && response.data) {
+        products.push(...response.data);
+        totalPages = response.totalPages || 1;
+      } else {
+        break;
+      }
+      page++;
+    } while (page <= totalPages);
+  } catch (error) {
+    console.error('Failed to fetch products for sitemap:', error);
+  }
+
   const categories = await getCategories();
 
   // Static routes
