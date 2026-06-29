@@ -16,6 +16,7 @@ export type Product = {
   categoryIds: string[];
   shortDescription?: string;
   description?: string;
+  seoKeywords?: string[];
   createdAt?: string;
   updatedAt?: string;
 };

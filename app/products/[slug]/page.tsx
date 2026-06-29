@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: product.name,
     description: stripHtml(product.description).slice(0, 160),
+    keywords: product.seoKeywords || [],
     openGraph: {
       images: product.images.length > 0 ? [{ url: product.images[0] }] : [],
     },
