@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProducts } from "@/lib/api";
+import { getSuggestions } from "@/lib/api";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { data: products } = await getProducts({ search: q, limit: 5 });
+    const products = await getSuggestions(q);
     
     // Map to a lightweight representation for the suggestions dropdown
     const suggestions = products.map((p) => ({

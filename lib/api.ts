@@ -80,6 +80,10 @@ export async function getRelatedProducts(slug: string, limit: number = 8) {
   return apiFetch<Product[]>(`/products/${slug}/related`, { limit });
 }
 
+export async function getSuggestions(search: string) {
+  return apiFetch<Product[]>("/products/suggest", { search });
+}
+
 // ---------------------------------------------------------
 // CATEGORIES
 // ---------------------------------------------------------
