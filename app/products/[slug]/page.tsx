@@ -156,7 +156,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       )}
 
       <section className="mt-16 sm:mt-24 border-t border-line pt-16 sm:pt-24">
-        <h2 className="mb-8 text-2xl font-bold">You might also like</h2>
+        <h2 className="mb-8 text-2xl font-bold">Compatible Components & Recommendations</h2>
         <RelatedProducts 
           key={product._id}
           relatedProducts={relatedProducts || []} 
