@@ -13,13 +13,25 @@ import { marked } from "marked";
 export const revalidate = 60;
 
 export async function generateStaticParams() {
+  const products: any[] = [];
+  let page = 1;
+  let totalPages = 1;
+
   try {
-    const response = await getProducts({ limit: 100 });
-    if (response && response.data) {
-      return response.data.map((product) => ({
-        slug: product.slug,
-      }));
-    }
+    do {
+      const response = await getProducts({ limit: 100, page });
+      if (response && response.data) {
+        products.push(...response.data);
+        totalPages = response.totalPages || 1;
+      } else {
+        break;
+      }
+      page++;
+    } while (page <= totalPages);
+
+    return products.map((product) => ({
+      slug: product.slug,
+    }));
   } catch (error) {
     console.error("Failed to generate static params for products:", error);
   }
