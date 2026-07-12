@@ -1,0 +1,15 @@
+# HN Electronics
+
+> Premium electronics, components, and accessories for Sri Lankan creators, homes, and repair desks.
+
+## Primary Routes
+- [Homepage](https://hnelectronics.lk/) - Shop search, featured products, categories.
+- [Shop](https://hnelectronics.lk/shop) - Filter and search all available electronics and components.
+- [About](https://hnelectronics.lk/about) - Learn more about HN Electronics.
+- [Cart](https://hnelectronics.lk/cart) - View selected components and checkout.
+
+## Main Product Categories
+- Development Boards (Arduino, Raspberry Pi, ESP32)
+- Sensors (Temperature, Humidity, Motion, Ultrasonic)
+- Active & Passive Components (Resistors, Capacitors, Transistors, ICs)
+- Tools & Power Supplies (Soldering irons, multimeters, breadboards)

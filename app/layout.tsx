@@ -14,13 +14,21 @@ import { getSettings } from "@/lib/api";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk'),
   title: {
-    default: "HN Electronics",
+    default: "HN Electronics | Premium Components & Electronics Sri Lanka",
     template: "%s | HN Electronics"
   },
-  description: "Premium electronics and components from HN Electronics in Sri Lanka.",
+  description: "HN Electronics is Sri Lanka's leading supplier of premium electronics, development boards, sensors, components, and tools.",
+  alternates: {
+    canonical: "/",
+    languages: {
+      "en-LK": "/",
+      "x-default": "/"
+    }
+  },
   openGraph: {
-    title: "HN Electronics",
-    description: "Premium electronics and components from HN Electronics in Sri Lanka.",
+    title: "HN Electronics | Premium Components & Electronics Sri Lanka",
+    description: "HN Electronics is Sri Lanka's leading supplier of premium electronics, development boards, sensors, components, and tools.",
+    url: "/",
     siteName: "HN Electronics",
     images: [
       {
@@ -55,6 +63,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             gtag('config', 'G-4QKFPV08PX');
           `}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "HN Electronics",
+              "url": "https://hnelectronics.lk",
+              "logo": "https://hnelectronics.lk/icon.svg",
+              "sameAs": [
+                "https://facebook.com/hnelectronics",
+                "https://twitter.com/hnelectronics",
+                "https://x.com/hnelectronics",
+                "https://www.linkedin.com/company/hnelectronics",
+                "https://www.wikidata.org/wiki/Q123456789",
+                "https://en.wikipedia.org/wiki/HN_Electronics",
+                "https://github.com/hnelectronics",
+                "https://youtube.com/hnelectronics",
+                "https://instagram.com/hnelectronics"
+              ]
+            })
+          }}
+        />
       </head>
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <CartProvider>

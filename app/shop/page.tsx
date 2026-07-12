@@ -12,6 +12,7 @@ type ShopParams = {
   category?: string;
   search?: string;
   sort?: string;
+  page?: string;
 };
 
 export async function generateMetadata({ searchParams }: { searchParams: ShopParams }): Promise<Metadata> {
@@ -44,9 +45,10 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
     sortOrder = "desc";
   }
 
+  const currentPage = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const { data: products, facets, totalPages, total } = await getProducts({
     limit: 20,
-    page: 1,
+    page: isNaN(currentPage) ? 1 : currentPage,
     category: searchParams.category, // Pass comma-separated string natively
     search: searchParams.search,
     sort: sortField,
@@ -92,6 +94,36 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
             searchParams={searchParams} 
             activeCategoryId={searchParams.category}
           />
+
+          {/* Fallback pagination for SEO / non-JS crawlers */}
+          {totalPages > 1 && (
+            <noscript>
+              <div className="mt-12 flex justify-center gap-4 text-sm">
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const pageNum = i + 1;
+                  const active = pageNum === currentPage;
+                  const params = new URLSearchParams();
+                  if (searchParams.category) params.set("category", searchParams.category);
+                  if (searchParams.search) params.set("search", searchParams.search);
+                  if (searchParams.sort) params.set("sort", searchParams.sort);
+                  params.set("page", String(pageNum));
+                  
+                  return (
+                    <Link
+                      key={pageNum}
+                      href={`/shop?${params.toString()}`}
+                      className={cn(
+                        "px-3 py-1 border border-line rounded hover:bg-neutral-50",
+                        active && "bg-neutral-100 font-semibold"
+                      )}
+                    >
+                      {pageNum}
+                    </Link>
+                  );
+                })}
+              </div>
+            </noscript>
+          )}
         </section>
       </div>
 
