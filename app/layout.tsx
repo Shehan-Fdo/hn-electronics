@@ -13,9 +13,6 @@ import { getSettings } from "@/lib/api";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk'),
-  alternates: {
-    canonical: '/',
-  },
   title: {
     default: "HN Electronics",
     template: "%s | HN Electronics"

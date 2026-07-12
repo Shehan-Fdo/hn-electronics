@@ -23,6 +23,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: product.name,
     description: stripHtml(product.description).slice(0, 160),
     keywords: product.seoKeywords || [],
+    alternates: {
+      canonical: `/products/${product.slug}`,
+    },
     openGraph: {
       images: product.images.length > 0 ? [{ url: product.images[0] }] : [],
     },
@@ -60,7 +63,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     description: stripHtml(product.description).slice(0, 160),
     offers: {
       '@type': 'Offer',
-      price: product.price,
+      price: Number(product.price || 0) / 100,
       priceCurrency: 'LKR',
       availability: 'https://schema.org/InStock',
       url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://hnelectronics.lk'}/products/${product.slug}`

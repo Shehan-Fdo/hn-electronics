@@ -5,6 +5,9 @@ import { getSettings } from "@/lib/api";
 export const metadata: Metadata = {
   title: "Shopping Cart | HN Electronics",
   description: "View and manage items in your shopping cart.",
+  alternates: {
+    canonical: "/cart"
+  }
 };
 
 export default async function CartPage() {

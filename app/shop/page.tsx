@@ -8,16 +8,25 @@ import { LinkButton } from "@/components/ui/Button";
 import { getCategories, getProducts } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Browse electronics, components, and accessories from HN Electronics."
-};
-
 type ShopParams = {
   category?: string;
   search?: string;
   sort?: string;
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: ShopParams }): Promise<Metadata> {
+  const canonical = searchParams.category
+    ? `/shop?category=${searchParams.category}`
+    : "/shop";
+
+  return {
+    title: "Shop",
+    description: "Browse electronics, components, and accessories from HN Electronics.",
+    alternates: {
+      canonical,
+    }
+  };
+}
 
 export default async function ShopPage({ searchParams }: { searchParams: ShopParams }) {
   const categories = await getCategories();

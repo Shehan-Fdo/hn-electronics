@@ -11,7 +11,10 @@ import { MotionSection, MotionStaggerDiv, MotionArticle } from "@/components/Mot
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about HN Electronics and contact the Sri Lankan electronics store."
+  description: "Learn about HN Electronics and contact the Sri Lankan electronics store.",
+  alternates: {
+    canonical: "/about"
+  }
 };
 
 export default function AboutPage() {

@@ -9,7 +9,10 @@ import { getCategories, getProducts, getSettings } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "HN Electronics",
-  description: "Shop genuine electronics, components, and accessories from HN Electronics in Sri Lanka."
+  description: "Shop genuine electronics, components, and accessories from HN Electronics in Sri Lanka.",
+  alternates: {
+    canonical: "/"
+  }
 };
 
 export default async function HomePage() {
@@ -23,8 +26,44 @@ export default async function HomePage() {
 
   const visibleCategories = categories.slice(0, 8);
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "HN Electronics",
+    "url": "https://hnelectronics.lk",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://hnelectronics.lk/shop?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ElectronicsStore",
+    "name": "HN Electronics",
+    "url": "https://hnelectronics.lk",
+    "logo": "https://hnelectronics.lk/icon.svg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+94-78-663-7512",
+      "contactType": "customer service"
+    },
+    "sameAs": [
+      "https://web.facebook.com/profile.php?id=100092009020397"
+    ]
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
       <HeroSlider 
         title={settings?.heroTitle}
         subtitle={settings?.heroSubtitle}
