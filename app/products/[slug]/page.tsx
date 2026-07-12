@@ -10,6 +10,22 @@ import { ShieldCheck, Truck, Tag, Zap } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { marked } from "marked";
 
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  try {
+    const response = await getProducts({ limit: 100 });
+    if (response && response.data) {
+      return response.data.map((product) => ({
+        slug: product.slug,
+      }));
+    }
+  } catch (error) {
+    console.error("Failed to generate static params for products:", error);
+  }
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = await getProduct(params.slug);
   
@@ -19,9 +35,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
+  const rawDescription = product.shortDescription || (product.description ? stripHtml(marked.parse(product.description) as string) : "");
+  const description = rawDescription.replace(/\s+/g, " ").trim().slice(0, 160);
+
   return {
     title: product.name,
-    description: stripHtml(product.description).slice(0, 160),
+    description,
     keywords: product.seoKeywords || [],
     alternates: {
       canonical: `/products/${product.slug}`,

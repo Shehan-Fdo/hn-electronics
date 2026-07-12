@@ -72,8 +72,15 @@ export async function getProducts(params: ProductQuery = {}) {
   });
 }
 
-export async function getProduct(slug: string) {
-  return apiFetch<Product>(`/products/${slug}`);
+export async function getProduct(slug: string): Promise<Product | null> {
+  try {
+    return await apiFetch<Product>(`/products/${slug}`);
+  } catch (error: any) {
+    if (error instanceof Error && error.message.includes("404")) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function getRelatedProducts(slug: string, limit: number = 8) {
