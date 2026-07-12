@@ -48,7 +48,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://pub-1bf4c41a11914900a0a34a31e2b4cb59.r2.dev https://cdn.hnelectronics.lk; connect-src 'self' https://www.google-analytics.com; font-src 'self' data:;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://pub-1bf4c41a11914900a0a34a31e2b4cb59.r2.dev https://cdn.hnelectronics.lk; connect-src 'self' https://www.google-analytics.com https://api.hnelectronics.lk; font-src 'self' data:;"
           }
         ]
       }
