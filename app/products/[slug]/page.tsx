@@ -4,6 +4,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { formatPrice, sanitizeHtml, stripHtml } from "@/lib/utils";
 import { getProduct, getProducts, getCategories, getSettings, getRelatedProducts } from "@/lib/api";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { ShieldCheck, Truck, Tag, Zap } from "lucide-react";
@@ -137,9 +138,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {productCategories && productCategories.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {productCategories.map((cat: any) => (
-                <div key={cat._id} className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-800">
+                <Link key={cat._id} href={`/shop?category=${cat.slug}`} className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-800 hover:bg-slate-200 transition-colors">
                   {cat.name}
-                </div>
+                </Link>
               ))}
             </div>
           )}
