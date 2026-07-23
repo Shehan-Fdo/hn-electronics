@@ -75,10 +75,8 @@ export function SearchBar({
     return () => clearTimeout(timer);
   }, [query, liveSearch, searchParams, pathname, router]);
 
-  // Suggestions fetching (for Navbar search)
+  // Suggestions fetching
   useEffect(() => {
-    if (liveSearch) return;
-
     const trimmedQuery = query.trim();
     if (!trimmedQuery || trimmedQuery.length < 2) {
       setSuggestions([]);

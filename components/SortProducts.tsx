@@ -8,6 +8,8 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { getProducts } from "@/lib/api";
 import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 
+import { useSearchParams } from "next/navigation";
+
 export function SortProducts({
   initialProducts,
   totalPages,
@@ -20,21 +22,51 @@ export function SortProducts({
   activeCategoryId?: string;
 }) {
   const router = useRouter();
+  const currentSearchParams = useSearchParams();
+  const searchVal = currentSearchParams.get("search") || "";
+  const categoryVal = currentSearchParams.get("category") || activeCategoryId || "";
+  const sortVal = currentSearchParams.get("sort") || searchParams.sort || "";
   
-  // We need to reset state when searchParams change (since it means a new query)
-  // To detect changes, we can track the initialProducts array, but React's easiest way is 
-  // relying on Next.js passing new props. We'll use a local state.
   const [products, setProducts] = useState(initialProducts);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(false);
 
-  // Sync state when new initialProducts come from the server
+  // Sync products live on URL query parameter changes (e.g. typing in live search bar)
   useEffect(() => {
-    setProducts(initialProducts);
-    setPage(1);
-    setError(false);
-  }, [initialProducts]);
+    let isMounted = true;
+    async function updateProducts() {
+      let sortField = "createdAt";
+      let sortOrder: "asc" | "desc" = "desc";
+      if (sortVal === "price-asc") {
+        sortField = "price";
+        sortOrder = "asc";
+      } else if (sortVal === "price-desc") {
+        sortField = "price";
+        sortOrder = "desc";
+      }
+
+      try {
+        const res = await getProducts({
+          limit: 20,
+          page: 1,
+          category: categoryVal,
+          search: searchVal,
+          sort: sortField,
+          order: sortOrder
+        });
+        if (isMounted && res && 'data' in res) {
+          setProducts(res.data);
+          setPage(1);
+        }
+      } catch (err) {
+        console.error("Live search update error:", err);
+      }
+    }
+
+    updateProducts();
+    return () => { isMounted = false; };
+  }, [searchVal, categoryVal, sortVal]);
 
   const { ref, inView } = useInView({
     threshold: 0,
