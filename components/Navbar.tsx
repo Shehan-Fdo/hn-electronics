@@ -36,7 +36,7 @@ export function Navbar() {
           ))}
         </div>
         <div className="flex items-center justify-end gap-4 sm:gap-5 md:flex-1">
-          <SearchBar compact className="hidden w-full max-w-[200px] xl:max-w-sm lg:flex" />
+          <SearchBar compact liveSearch className="hidden w-full max-w-[200px] xl:max-w-sm lg:flex" />
           <motion.div
             className="shrink-0"
             whileTap={{ scale: 0.97 }}

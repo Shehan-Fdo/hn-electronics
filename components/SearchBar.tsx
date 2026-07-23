@@ -31,16 +31,19 @@ export function SearchBar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState(defaultValue);
+  const currentSearchParam = searchParams.get("search") || "";
+
+  const [query, setQuery] = useState(currentSearchParam || defaultValue);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [searchError, setSearchError] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  // Sync state whenever URL search query parameter changes
   useEffect(() => {
-    setQuery(defaultValue);
-  }, [defaultValue]);
+    setQuery(currentSearchParam);
+  }, [currentSearchParam]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
