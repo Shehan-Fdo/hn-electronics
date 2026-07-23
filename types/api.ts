@@ -28,6 +28,7 @@ export type ProductQuery = {
   limit?: number | string;
   sort?: string;
   order?: string;
+  hasImage?: boolean | string;
 };
 
 export type CartItem = {

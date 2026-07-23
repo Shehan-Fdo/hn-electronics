@@ -68,7 +68,8 @@ export async function getProducts(params: ProductQuery = {}) {
     category: params.category,
     search: params.search,
     sort: params.sort,
-    order: params.order
+    order: params.order,
+    hasImage: params.hasImage ?? true
   });
 }
 
