@@ -70,7 +70,7 @@ export default async function ShopPage({ searchParams }: { searchParams: ShopPar
             <p className="mt-3 text-muted">Results for: &quot;{searchParams.search}&quot;</p>
           )}
         </div>
-        <SearchBar defaultValue={searchParams.search} className="md:w-96" />
+        <SearchBar defaultValue={searchParams.search} liveSearch className="md:w-96" />
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
